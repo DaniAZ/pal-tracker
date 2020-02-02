@@ -1,25 +1,32 @@
+import org.flywaydb.gradle.task.FlywayMigrateTask
+
 buildscript {
     ext {
         springBootVersion = "2.2.2.RELEASE"
     }
 
     repositories {
-        jcenter()
-        mavenCentral()
+          mavenCentral()
     }
 
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
+        classpath 'mysql:mysql-connector-java:8.0.13'
+
 
     }
 }
 
 
 plugins {
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id "org.flywaydb.flyway" version "5.2.1"
     id "java"
+
 }
 
 apply plugin: 'org.springframework.boot'
+
 
 repositories {
     jcenter()
@@ -29,13 +36,36 @@ repositories {
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
     compile("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'mysql:mysql-connector-java'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    test {
+        useJUnitPlatform()
+    }
 
 
 }
+def developmentDbUrl = "jdbc:mysql://localhost:3306/tracker_dev?user=tracker&useSSL=false&useTimezone=true&serverTimezone=UTC&useLegacyDatetimeCode=false"
 bootRun.environment([
-        "welcome.message": "hello",
+        "WELCOME_MESSAGE": "hello",
+        "SPRING_DATASOURCE_URL": developmentDbUrl,
 ])
 
+def testDbUrl = "jdbc:mysql://localhost:3306/tracker_test?user=tracker&useSSL=false&useTimezone=true&serverTimezone=UTC&useLegacyDatetimeCode=false"
 test.environment([
-        "welcome.message": "Hello from test",
+        "WELCOME_MESSAGE": "Hello from test",
+        "SPRING_DATASOURCE_URL": testDbUrl,
 ])
+
+flyway {
+    url = developmentDbUrl
+    user = "tracker"
+    password = ""
+    locations = ["filesystem:databases/tracker/migrations"]
+}
+
+task testMigrate(type: FlywayMigrateTask) {
+    url = testDbUrl
+}
