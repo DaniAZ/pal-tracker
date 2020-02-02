@@ -2,6 +2,7 @@ package test.pivotal.pal.tracker;
 
 import io.pivotal.pal.tracker.InMemoryTimeEntryRepository;
 import io.pivotal.pal.tracker.TimeEntry;
+import static org.assertj.core.api.Assertions.* ;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -63,6 +64,7 @@ public class InMemoryTimeEntryRepositoryTest {
         );
         assertThat(repo.list()).containsExactlyInAnyOrderElementsOf(expected);
     }
+
 
     @Test
     public void update() throws Exception {
